@@ -126,6 +126,15 @@
         font-size: 13px; font-weight: 700; cursor: pointer;
         transition: all 0.2s ease; text-align: left;
     }
+    .flash-answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+    .flash-answer-btn {
+        border-radius: 14px; padding: 12px; font-size: 15px; font-weight: 800;
+        border: none; cursor: pointer; transition: transform 0.15s ease;
+    }
+    .flash-answer-btn:hover { transform: translateY(-1px); }
+    .flash-answer-btn.yes { background: #00e676; color: #000; }
+    .flash-answer-btn.no { background: #ff1744; color: #fff; }
+    .flash-answer-btn.disabled { opacity: 0.45; cursor: not-allowed; }
     .option-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--fn-blue); }
     .option-btn.correct { background: rgba(0, 230, 118, 0.3) !important; border-color: #00e676 !important; }
     .option-btn.disabled { opacity: 0.4; cursor: not-allowed; }
@@ -197,9 +206,31 @@
         <div class="scene-img-container">
             <img src="White%20Fang-style%20wolf.png" alt="White Fang-like wolf in the Arctic snow" class="scene-img">
         </div>
-        <p class="desc">Blake! Every time you open this quest, you get a fresh set of <strong>20 randomized questions</strong> with shuffled answers. Each correct answer adds XP, and your total XP builds toward bonus screen time.</p>
+        <p class="desc">Blake! Every run pulls <strong>7 questions</strong> from a bank of <strong>20 randomized chapter questions</strong>. First you study 7 flashcards, then you answer 7 quiz questions with shuffled answer order.</p>
         <p class="desc">This chapter is worth <strong>5000 XP</strong> for a full run. That equals <strong>30 minutes</strong> of bonus time, capped at <strong>3 hours total</strong> with <strong>2 hours on Xbox</strong> and <strong>1 hour on phone</strong>.</p>
-        <button class="action-btn" onclick="startQuiz()">START RANDOMIZED QUEST 🚀</button>
+        <button class="action-btn" onclick="startQuiz()">START LEARNING + QUIZ 🚀</button>
+    </div>
+
+    <div class="screen" id="flashcard-screen">
+        <div class="tag tag-flash" id="flashcard-tag">FLASHCARD 1 / 7</div>
+        <h1 id="flashcard-title">LEARNING STAGE</h1>
+        <div class="flashcard-wrapper" onclick="toggleFlashcardFlip()">
+            <div class="flashcard" id="flashcard-card">
+                <div class="card-front">
+                    <h2 id="flashcard-question">Tap the card to reveal the answer</h2>
+                    <p style="font-size:14px; margin-top:12px;">Read the prompt, then flip the card to check your understanding.</p>
+                </div>
+                <div class="card-back">
+                    <h2>Answer</h2>
+                    <p id="flashcard-answer" style="font-size:16px; line-height:1.4;"></p>
+                </div>
+            </div>
+        </div>
+        <div class="challenge-box">
+            <p id="flashcard-hint" style="font-size:16px; color: var(--fn-yellow);">Choose whether you feel confident with this concept.</p>
+        </div>
+        <div class="flash-answer-grid" id="flash-answer-grid"></div>
+        <button class="action-btn" id="begin-quiz-btn" style="display:none;" onclick="beginQuiz()">BEGIN QUIZ ⏳</button>
     </div>
 
     <div class="screen" id="quiz-screen">
@@ -233,13 +264,18 @@
             <p style="font-size: 34px; font-weight: 900; color: var(--fn-yellow);" id="total-xp">0</p>
             <p id="bonus-time" style="margin-top: 8px; font-size: 15px; color: #f1f5f9;"></p>
         </div>
+        <div class="challenge-box" style="text-align: center;">
+            <h3 style="font-size: 20px; font-family:'Teko'; margin-bottom: 6px;">FLASHCARD CONFIDENCE</h3>
+            <p id="flashcard-summary" style="font-size: 16px; line-height: 1.4; color: #f1f5f9; margin: 0;"></p>
+        </div>
         <button class="action-btn" onclick="location.reload()">PLAY AGAIN 🔄</button>
     </div>
 </div>
 
 <script>
     const XP_PER_CORRECT = 250;
-    const TOTAL_QUESTIONS = 20;
+    const TOTAL_AVAILABLE_QUESTIONS = 20;
+    const QUESTIONS_PER_RUN = 7;
     const XP_CAP = 30000;
     const STORAGE_KEY = 'blake-white-fang-xp';
 
@@ -248,7 +284,10 @@
     let questionBank = [];
     let currentQuestions = [];
     let currentIndex = 0;
+    let currentFlashIndex = 0;
     let answered = false;
+    let flashAnswered = false;
+    let flashResponses = [];
 
     function updateHUD() {
         document.getElementById('vbucks-count').innerText = totalXP;
@@ -528,12 +567,74 @@
 
     function startQuiz() {
         buildQuestionBank();
-        const shuffled = shuffleArray(questionBank).slice(0, TOTAL_QUESTIONS);
-        currentQuestions = shuffled;
+        const shuffled = shuffleArray(questionBank);
+        currentQuestions = shuffled.slice(0, QUESTIONS_PER_RUN);
+        currentIndex = 0;
+        currentFlashIndex = 0;
+        answered = false;
+        flashAnswered = false;
+        sessionXP = 0;
+        flashResponses = [];
+        updateHUD();
+        showScreen('flashcard-screen');
+        renderFlashcard();
+    }
+
+    function renderFlashcard() {
+        const card = currentQuestions[currentFlashIndex];
+        const prompt = pickVariant(card.promptVariants);
+        document.getElementById('flashcard-tag').innerText = `FLASHCARD ${currentFlashIndex + 1} / ${QUESTIONS_PER_RUN}`;
+        document.getElementById('flashcard-question').innerText = prompt;
+        document.getElementById('flashcard-answer').innerText = pickVariant(card.options.find(opt => opt.correct).textVariants);
+        document.getElementById('flashcard-hint').innerText = 'Tap the card to flip, then choose whether you feel confident with this concept.';
+        document.getElementById('flashcard-card').classList.remove('flipped');
+        const buttons = [
+            { text: 'Yes, I know this', value: true, cls: 'yes' },
+            { text: 'No, I need to review', value: false, cls: 'no' }
+        ];
+        const shuffledButtons = shuffleArray(buttons);
+        const grid = document.getElementById('flash-answer-grid');
+        grid.innerHTML = '';
+        shuffledButtons.forEach(btnData => {
+            const btn = document.createElement('button');
+            btn.className = `flash-answer-btn ${btnData.cls}`;
+            btn.innerText = btnData.text;
+            btn.onclick = (event) => { event.stopPropagation(); answerFlashcard(btn, btnData.value); };
+            grid.appendChild(btn);
+        });
+        document.getElementById('begin-quiz-btn').style.display = 'none';
+        flashAnswered = false;
+    }
+
+    function toggleFlashcardFlip() {
+        const card = document.getElementById('flashcard-card');
+        card.classList.toggle('flipped');
+    }
+
+    function answerFlashcard(button, knewIt) {
+        if (flashAnswered) return;
+        flashAnswered = true;
+        document.querySelectorAll('.flash-answer-btn').forEach(btn => btn.classList.add('disabled'));
+        flashResponses.push({ index: currentFlashIndex, knewIt });
+        document.getElementById('flashcard-hint').innerText = knewIt
+            ? 'Nice! You feel confident with this one. Keep going.'
+            : 'Good catch. Review the answer and focus on the next card.';
+
+        if (currentFlashIndex < QUESTIONS_PER_RUN - 1) {
+            setTimeout(() => {
+                currentFlashIndex += 1;
+                renderFlashcard();
+            }, 700);
+        } else {
+            document.getElementById('begin-quiz-btn').style.display = 'block';
+            document.getElementById('flashcard-hint').innerText = 'Great work! When you are ready, begin the quiz.';
+        }
+    }
+
+    function beginQuiz() {
         currentIndex = 0;
         answered = false;
-        sessionXP = 0;
-        updateHUD();
+        document.getElementById('progress-bar').style.width = '0%';
         showScreen('quiz-screen');
         renderQuestion();
     }
@@ -541,7 +642,7 @@
     function renderQuestion() {
         const question = currentQuestions[currentIndex];
         const prompt = pickVariant(question.promptVariants);
-        document.getElementById('question-tag').innerText = `QUESTION ${currentIndex + 1} / ${TOTAL_QUESTIONS}`;
+        document.getElementById('question-tag').innerText = `QUESTION ${currentIndex + 1} / ${QUESTIONS_PER_RUN}`;
         document.getElementById('question-title').innerText = 'CHAPTER 1 QUIZ';
         document.getElementById('question-image').src = question.image;
         document.getElementById('question-text').innerText = prompt;
@@ -558,7 +659,7 @@
         document.getElementById('feedback-box').style.display = 'none';
         document.getElementById('next-btn').style.display = 'none';
         answered = false;
-        document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / TOTAL_QUESTIONS) * 100}%`;
+        document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / QUESTIONS_PER_RUN) * 100}%`;
     }
 
     function answerQuestion(button, isCorrect, correctText) {
@@ -591,13 +692,13 @@
         document.querySelectorAll('.option-btn').forEach(btn => btn.classList.add('disabled'));
         feedbackBox.style.display = 'block';
         nextBtn.style.display = 'block';
-        if (currentIndex === TOTAL_QUESTIONS - 1) {
+        if (currentIndex === QUESTIONS_PER_RUN - 1) {
             nextBtn.innerText = 'VIEW RESULTS 🏁';
         }
     }
 
     function nextQuestion() {
-        if (currentIndex < TOTAL_QUESTIONS - 1) {
+        if (currentIndex < QUESTIONS_PER_RUN - 1) {
             currentIndex += 1;
             renderQuestion();
         } else {
@@ -609,6 +710,12 @@
         document.getElementById('run-xp').innerText = sessionXP;
         document.getElementById('total-xp').innerText = totalXP;
         document.getElementById('bonus-time').innerText = bonusTimeText(totalXP);
+        const knownCount = flashResponses.filter(resp => resp.knewIt).length;
+        const reviewCount = QUESTIONS_PER_RUN - knownCount;
+        const summaryText = reviewCount === 0
+            ? 'You felt confident on all 7 flashcards. Great review session!'
+            : `You felt confident on ${knownCount} card${knownCount === 1 ? '' : 's'} and wanted to review ${reviewCount}.`;
+        document.getElementById('flashcard-summary').innerText = summaryText;
         updateHUD();
         showScreen('results-screen');
     }
