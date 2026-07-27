@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>White Fang: Chapter 1 Comprehension Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --fn-purple: #7000ff;
+        --fn-blue: #00d2ff;
+        --fn-yellow: #ffe600;
+        --wolf-red: #ff2a2a;
+        --snow-white: #f0f8ff;
+        --dh-green: #00e676;
+        --dh-orange: #ff5500;
+        --card-bg: rgba(15, 23, 42, 0.94);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background: #080d1a;
+        color: var(--snow-white);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        background-image: 
+            radial-gradient(circle at 20% 20%, rgba(0, 210, 255, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 80%, rgba(255, 42, 42, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1) 0%, transparent 60%);
+        padding: 15px;
+    }
+
+    .hud {
+        position: fixed;
+        top: 15px; left: 20px; right: 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        z-index: 100;
+        background: rgba(10, 15, 30, 0.88);
+        padding: 12px 25px; border-radius: 15px;
+        border: 2px solid rgba(0, 210, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .hud-title { font-family: 'Press Start 2P', cursive; font-size: 11px; color: var(--fn-yellow); }
+    .hud-vbucks { font-family: 'Teko', sans-serif; font-size: 26px; color: var(--fn-blue); }
+
+    .game-container { width: 100%; max-width: 800px; margin-top: 60px; }
+
+    .screen {
+        display: none;
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 28px;
+        border: 3px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tag {
+        display: inline-block; padding: 6px 14px; border-radius: 30px;
+        font-family: 'Press Start 2P', cursive; font-size: 10px;
+        text-transform: uppercase; margin-bottom: 12px;
+    }
+    .tag-wf { background: var(--fn-purple); }
+    .tag-read { background: var(--wolf-red); }
+    .tag-flash { background: var(--fn-blue); color: #000; }
+
+    h1 { font-family: 'Teko', sans-serif; font-size: 38px; line-height: 1; margin-bottom: 10px; color: var(--snow-white); }
+    p.desc { font-size: 16px; line-height: 1.5; color: #cbd5e1; margin-bottom: 18px; }
+
+    /* Scene Illustration Styling */
+    .scene-img-container {
+        width: 100%;
+        height: 220px;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        border: 2px solid rgba(0, 210, 255, 0.3);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        background: #000;
+    }
+
+    .scene-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .challenge-box {
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 16px; padding: 18px; margin-bottom: 18px;
+    }
+
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .option-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 14px; padding: 16px;
+        color: #fff; font-family: 'Montserrat', sans-serif;
+        font-size: 15px; font-weight: 700; cursor: pointer;
+        transition: all 0.2s ease; text-align: left;
+    }
+    .option-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--fn-blue); }
+    .option-btn.correct { background: rgba(0, 230, 118, 0.3) !important; border-color: #00e676 !important; }
+    .option-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Coaching Modal */
+    .coach-box {
+        display: none;
+        background: rgba(255, 85, 0, 0.15);
+        border: 2px solid var(--dh-orange);
+        border-radius: 16px; padding: 18px; margin-bottom: 18px;
+    }
+    .coach-box h3 { color: var(--fn-yellow); font-family: 'Teko', sans-serif; font-size: 26px; }
+    .coach-box p { font-size: 15px; margin-top: 6px; line-height: 1.4; color: #f1f5f9; }
+
+    /* Flashcard Engine */
+    .flashcard-wrapper {
+        perspective: 1000px; width: 100%; height: 220px; margin-bottom: 15px; cursor: pointer;
+    }
+    .flashcard {
+        width: 100%; height: 100%; position: relative;
+        transform-style: preserve-3d; transition: transform 0.5s ease;
+        border-radius: 20px;
+    }
+    .flashcard.flipped { transform: rotateY(180deg); }
+    .card-front, .card-back {
+        position: absolute; width: 100%; height: 100%;
+        backface-visibility: hidden; border-radius: 20px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 20px; text-align: center; border: 2px solid rgba(255,255,255,0.2);
+    }
+    .card-front { background: linear-gradient(135deg, #0f172a, #1e293b); color: var(--fn-yellow); }
+    .card-back { background: linear-gradient(135deg, #00d2ff, #0072ff); color: #fff; transform: rotateY(180deg); }
+
+    .rep-controls { display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .rep-btn {
+        padding: 14px; border-radius: 12px; border: none; font-weight: 900;
+        font-family: 'Teko', sans-serif; font-size: 22px; cursor: pointer; text-transform: uppercase;
+    }
+    .rep-again { background: #ff1744; color: #fff; }
+    .rep-easy { background: #00e676; color: #000; }
+
+    .action-btn {
+        width: 100%; background: linear-gradient(90deg, #ff5500, #ff0055);
+        border: none; border-radius: 16px; padding: 18px; color: #fff;
+        font-family: 'Teko', sans-serif; font-size: 28px; text-transform: uppercase;
+        letter-spacing: 2px; cursor: pointer;
+    }
+
+    .progress-bar-container { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--fn-blue), var(--dh-green)); transition: width 0.4s ease; }
+
+    @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="hud">
+    <div class="hud-title">WHITE FANG QUEST</div>
+    <div class="hud-vbucks">⚡ XP POINTS: <span id="vbucks-count">0</span></div>
+</div>
+
+<div class="game-container">
+    <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
+
+    <!-- PAGE 0: START -->
+    <div class="screen active" id="page-0">
+        <div class="tag tag-wf">JACK LONDON COMPREHENSION</div>
+        <h1>WHITE FANG: CHAPTER 1 QUEST 🐺</h1>
+        <div class="scene-img-container">
+            <img src="https://source.unsplash.com/featured/1000x600/?wolf,white%20fang,arctic" alt="White Fang-like wolf in the Arctic snow" class="scene-img">
+        </div>
+        <p class="desc">Blake! Welcome to the frozen Yukon territory in <strong>Part 1, Chapter 1 ("The Trail of the Meat")</strong>. Test your story knowledge, decode vocabulary, and complete active recall flashcards to earn 6000 XP!</p>
+        <button class="action-btn" onclick="nextPage(1)">START READING QUEST 🚀</button>
+    </div>
+
+    <!-- STAGE 1: THE SETTING & CARGO -->
+    <div class="screen" id="page-1">
+        <div class="tag tag-read">STAGE 1: THE WILD YUKON</div>
+        <h1>THE FROZEN TRAIL</h1>
+        <div class="scene-img-container">
+            <img src="https://source.unsplash.com/featured/1000x600/?husky,sled,dogs,snow" alt="Husky sled dogs pulling through snow" class="scene-img">
+        </div>
+        <p class="desc">Two men, <strong>Bill and Henry</strong>, are struggling through the frozen wilderness on a sled pulled by dogs. They are carrying a long, narrow box.</p>
+        
+        <div class="challenge-box">
+            <p style="font-size: 18px; color: var(--fn-yellow);">What is inside the narrow wooden box tied to their sled?</p>
+        </div>
+
+        <div class="options-grid" id="opts-1">
+            <button class="option-btn" onclick="handleChoice(1, this, false, 'Not gold! While the Yukon had gold rushes, this box contains something much more grim.')">A) Gold bullion from the mine</button>
+            <button class="option-btn" onclick="handleChoice(1, this, true)">B) The body of Lord Alfred (a coffin)</button>
+            <button class="option-btn" onclick="handleChoice(1, this, false, 'They have food bags on the sled, but that is not what is inside the long box!')">C) Fresh meat supplies for camp</button>
+            <button class="option-btn" onclick="handleChoice(1, this, false, 'Their rifles are kept close at hand, not strapped inside a box!')">D) Extra hunting rifles and ammo</button>
+        </div>
+
+        <div class="coach-box" id="coach-1">
+            <h3>💡 SQUAD COACH TIP:</h3>
+            <p id="coach-text-1"></p>
+        </div>
+
+        <button class="action-btn" id="btn-1" style="display:none;" onclick="nextPage(2)">STAGE 2: NIGHT CAMP ⏩</button>
+    </div>
+
+    <!-- STAGE 2: THE MYSTERIOUS EXTRA FISH -->
+    <div class="screen" id="page-2">
+        <div class="tag tag-read">STAGE 2: FEEDING TIME</div>
+        <h1>COUNTING THE DOGS</h1>
+        <div class="scene-img-container">
+            <img src="https://source.unsplash.com/featured/1000x600/?campfire,dogs,snow,night" alt="Dogs huddled closely around a campfire in freezing night snow" class="scene-img">
+        </div>
+        <p class="desc">At night, Bill feeds dried fish to the sled dogs. He notices something strange happens when he hands out the food.</p>
+
+        <div class="challenge-box">
+            <p style="font-size: 18px; color: var(--fn-yellow);">Why does Bill say he gave out 7 fish when they only have 6 dogs?</p>
+        </div>
+
+        <div class="options-grid" id="opts-2">
+            <button class="option-btn" onclick="handleChoice(2, this, false, 'Bill is sharp and careful with food—he didn\'t miscount!')">A) He accidentally dropped a fish in the snow</button>
+            <button class="option-btn" onclick="handleChoice(2, this, false, 'One dog was greedy, but that wasn\'t why a 7th creature took a fish!')">B) One of their dogs ate two fish really quickly</button>
+            <button class="option-btn" onclick="handleChoice(2, this, true)">C) A wild wolf snuck in and took a fish pretending to be a dog</button>
+            <button class="option-btn" onclick="handleChoice(2, this, false, 'Henry was resting by the fire, not taking dog fish!')">D) Henry ate one of the dried fish</button>
+        </div>
+
+        <div class="coach-box" id="coach-2">
+            <h3>💡 SQUAD COACH TIP:</h3>
+            <p id="coach-text-2"></p>
+        </div>
+
+        <button class="action-btn" id="btn-2" style="display:none;" onclick="nextPage(3)">STAGE 3: THE ATMOSPHERE ⏩</button>
+    </div>
+
+    <!-- STAGE 3: THE WILDERNESS MOOD -->
+    <div class="screen" id="page-3">
+        <div class="tag tag-read">STAGE 3: THE WILDERNESS</div>
+        <h1>THE THREAT IN THE DARK</h1>
+        <div class="scene-img-container">
+            <img src="https://source.unsplash.com/featured/1000x600/?dark,forest,night,snow,freezing" alt="Dark scary forest at night in freezing cold" class="scene-img">
+        </div>
+        <p class="desc">As night falls, red glowing eyes circle their campfire and loud howls fill the freezing air.</p>
+
+        <div class="challenge-box">
+            <p style="font-size: 18px; color: var(--fn-yellow);">How does Jack London describe the Yukon "Wild" in this chapter?</p>
+        </div>
+
+        <div class="options-grid" id="opts-3">
+            <button class="option-btn" onclick="handleChoice(3, this, false, 'The chapter emphasizes extreme silence, cold, and danger!')">A) A peaceful, welcoming winter paradise</button>
+            <button class="option-btn" onclick="handleChoice(3, this, true)">B) Vast, frozen, silent, and sternly hostile to human life</button>
+            <button class="option-btn" onclick="handleChoice(3, this, false, 'There are no towns anywhere near them on this trail!')">C) A bustling trade route full of traveler inns</button>
+            <button class="option-btn" onclick="handleChoice(3, this, false, 'The wilderness is freezing cold, covered in snow and ice!')">D) A warm, gentle forest with mild winds</button>
+        </div>
+
+        <div class="coach-box" id="coach-3">
+            <h3>💡 SQUAD COACH TIP:</h3>
+            <p id="coach-text-3"></p>
+        </div>
+
+        <button class="action-btn" id="btn-3" style="display:none;" onclick="nextPage(4)">STAGE 4: VOCABULARY ⏩</button>
+    </div>
+
+    <!-- STAGE 4: VOCABULARY IN CONTEXT -->
+    <div class="screen" id="page-4">
+        <div class="tag tag-read">STAGE 4: YUKON VOCABULARY</div>
+        <h1>WORD POWER</h1>
+        <div class="scene-img-container">
+            <img src="https://source.unsplash.com/featured/1000x600/?dark,forest,night,winter,freeze" alt="Bleak frozen forest atmosphere in the Yukon night" class="scene-img">
+        </div>
+        <p class="desc">London writes that the wolf pack was <strong>"ravenous"</strong> as they stalked the sled team through the deep snow.</p>
+
+        <div class="challenge-box">
+            <p style="font-size: 18px; color: var(--fn-yellow);">What does the word <strong>RAVENOUS</strong> mean in this story?</p>
+        </div>
+
+        <div class="options-grid" id="opts-4">
+            <button class="option-btn" onclick="handleChoice(4, this, false, 'Sled dogs are tired, but ravenous describes their hunger!')">A) Extremely exhausted and sleepy</button>
+            <button class="option-btn" onclick="handleChoice(4, this, true)">B) Extremely hungry and famished</button>
+            <button class="option-btn" onclick="handleChoice(4, this, false, 'Playful dogs aren\'t circling a campfire in the dark!')">C) Playful and friendly</button>
+            <button class="option-btn" onclick="handleChoice(4, this, false, 'Loud noises might happen, but ravenous refers to stomach state!')">D) Loud and noisy</button>
+        </div>
+
+        <div class="coach-box" id="coach-4">
+            <h3>💡 SQUAD COACH TIP:</h3>
+            <p id="coach-text-4"></p>
+        </div>
+
+        <button class="action-btn" id="btn-4" style="display:none;" onclick="nextPage(5)">STAGE 5: FLASHCARDS ⏩</button>
+    </div>
+
+    <!-- STAGE 5: ACTIVE RECALL FLASHCARDS -->
+    <div class="screen" id="page-5">
+        <div class="tag tag-flash">STAGE 5: ACTIVE RECALL ARENA</div>
+        <h1>VOCABULARY & STORY FLASHCARDS</h1>
+        <p class="desc">Say the answer OUT LOUD first (Active Recall), then tap to flip! Tap <strong>AGAIN</strong> if you need to repeat a card until it's mastered!</p>
+
+        <div style="font-size:14px; font-weight:bold; margin-bottom:8px; color:var(--fn-blue);" id="cards-remaining">CARDS LEFT: 5</div>
+
+        <div class="flashcard-wrapper" onclick="flipCard()">
+            <div class="flashcard" id="active-card">
+                <div class="card-front">
+                    <span style="font-size: 11px; color: #aaa;">TAP TO REVEAL ANSWER</span>
+                    <h2 style="font-size: 24px; margin-top: 10px;" id="fc-q">Loading Question...</h2>
+                </div>
+                <div class="card-back">
+                    <h2 style="font-size: 20px; color:var(--fn-yellow); margin-bottom: 6px;">ANSWER 💡</h2>
+                    <p style="font-size: 16px;" id="fc-a">Loading Answer...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="rep-controls" id="rep-controls">
+            <button class="rep-btn rep-again" onclick="rateCard(false)">❌ AGAIN (RE-QUEUE)</button>
+            <button class="rep-btn rep-easy" onclick="rateCard(true)">✅ EASY (MASTERED)</button>
+        </div>
+
+        <button class="action-btn" id="btn-5" style="display:none;" onclick="nextPage(6)">CLAIM VICTORY 🏆</button>
+    </div>
+
+    <!-- STAGE 6: VICTORY ROYALE -->
+    <div class="screen" id="page-6">
+        <div style="font-size: 70px; text-align: center; margin-bottom: 10px;">🐺</div>
+        <div class="tag tag-wf" style="margin: 0 auto 10px auto; display: table;">QUEST COMPLETED</div>
+        <h1 style="text-align: center; color: var(--fn-yellow);">CHAPTER 1 MASTERED!</h1>
+        <div class="scene-img-container">
+            <img src="https://source.unsplash.com/featured/1000x600/?female%20wolf,husky,nose,touch,snow" alt="Female wolf and husky touching noses in snow" class="scene-img">
+        </div>
+        <p class="desc" style="text-align: center;">Legendary job, Blake! You fully decoded Jack London's <em>White Fang</em> Chapter 1, mastered key vocabulary, and conquered Active Recall!</p>
+
+        <div class="challenge-box" style="text-align: center;">
+            <h3 style="font-size: 28px; font-family:'Teko';">TOTAL XP EARNED</h3>
+            <p style="font-size: 48px; font-weight: 900; color: var(--fn-blue);" id="final-vbucks">0</p>
+        </div>
+
+        <button class="action-btn" onclick="location.reload()">REPLAY QUEST 🔄</button>
+    </div>
+</div>
+
+<script>
+    let vbucks = 0;
+    const totalPages = 6;
+
+    function updateHUD() { document.getElementById('vbucks-count').innerText = vbucks; }
+
+    function nextPage(p) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(`page-${p}`).classList.add('active');
+        document.getElementById('progress-bar').style.width = `${(p / totalPages) * 100}%`;
+        if(p === 6) document.getElementById('final-vbucks').innerText = vbucks;
+    }
+
+    function handleChoice(stage, btn, isCorrect, coachText = '') {
+        const coachBox = document.getElementById(`coach-${stage}`);
+        const coachMsg = document.getElementById(`coach-text-${stage}`);
+        const nextBtn = document.getElementById(`btn-${stage}`);
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            coachBox.style.display = 'none';
+            vbucks += 1000;
+            updateHUD();
+            btn.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+            nextBtn.style.display = 'block';
+        } else {
+            btn.classList.add('disabled');
+            coachMsg.innerText = coachText;
+            coachBox.style.display = 'block';
+        }
+    }
+
+    // Active Recall Flashcards
+    let deck = [
+        { q: "Who are the two main human characters in Chapter 1?", a: "Bill and Henry!" },
+        { q: "What is inside the narrow box on the sled?", a: "The coffin of Lord Alfred!" },
+        { q: "Why was there an extra fish taken at feeding time?", a: "A wild wolf snuck into camp posing as a dog!" },
+        { q: "What does 'Ravenous' mean?", a: "Extremely hungry / famished!" },
+        { q: "Where is 'White Fang' set?", a: "The frozen Yukon Territory (Canada)!" }
+    ];
+
+    let currentCard = 0;
+    let isFlipped = false;
+
+    function renderCard() {
+        if (deck.length === 0) {
+            document.querySelector('.flashcard-wrapper').style.display = 'none';
+            document.getElementById('rep-controls').style.display = 'none';
+            document.getElementById('cards-remaining').innerText = "🎉 ALL 5 CARDS MASTERED!";
+            document.getElementById('btn-5').style.display = 'block';
+            vbucks += 1000;
+            updateHUD();
+            return;
+        }
+
+        currentCard = currentCard % deck.length;
+        document.getElementById('cards-remaining').innerText = `CARDS LEFT TO MASTER: ${deck.length}`;
+        const cardEl = document.getElementById('active-card');
+        cardEl.classList.remove('flipped');
+        isFlipped = false;
+        document.getElementById('rep-controls').style.display = 'none';
+
+        setTimeout(() => {
+            document.getElementById('fc-q').innerText = deck[currentCard].q;
+            document.getElementById('fc-a').innerText = deck[currentCard].a;
+        }, 150);
+    }
+
+    function flipCard() {
+        if (deck.length === 0) return;
+        const cardEl = document.getElementById('active-card');
+        cardEl.classList.toggle('flipped');
+        isFlipped = !isFlipped;
+        if (isFlipped) {
+            document.getElementById('rep-controls').style.display = 'grid';
+        }
+    }
+
+    function rateCard(easy) {
+        if (easy) {
+            deck.splice(currentCard, 1);
+        } else {
+            const item = deck.splice(currentCard, 1)[0];
+            deck.push(item);
+        }
+        renderCard();
+    }
+
+    renderCard();
+</script>
+</body>
+</html>
