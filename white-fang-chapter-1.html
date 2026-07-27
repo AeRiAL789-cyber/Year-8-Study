@@ -185,272 +185,435 @@
 
 <div class="hud">
     <div class="hud-title">WHITE FANG QUEST</div>
-    <div class="hud-vbucks">⚡ XP POINTS: <span id="vbucks-count">0</span></div>
+    <div class="hud-vbucks">⚡ XP TOTAL: <span id="vbucks-count">0</span></div>
 </div>
 
 <div class="game-container">
     <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
 
-    <!-- PAGE 0: START -->
-    <div class="screen active" id="page-0">
+    <div class="screen active" id="start-screen">
         <div class="tag tag-wf">JACK LONDON COMPREHENSION</div>
         <h1>WHITE FANG: CHAPTER 1 QUEST 🐺</h1>
         <div class="scene-img-container">
             <img src="White%20Fang-style%20wolf.png" alt="White Fang-like wolf in the Arctic snow" class="scene-img">
         </div>
-        <p class="desc">Blake! Welcome to the frozen Yukon territory in <strong>Part 1, Chapter 1 ("The Trail of the Meat")</strong>. Test your story knowledge, decode vocabulary, and complete active recall flashcards to earn 6000 XP!</p>
-        <button class="action-btn" onclick="nextPage(1)">START READING QUEST 🚀</button>
+        <p class="desc">Blake! Every time you open this quest, you get a fresh set of <strong>20 randomized questions</strong> with shuffled answers. Each correct answer adds XP, and your total XP builds toward bonus screen time.</p>
+        <p class="desc">This chapter is worth <strong>5000 XP</strong> for a full run. That equals <strong>30 minutes</strong> of bonus time, capped at <strong>3 hours total</strong> with <strong>2 hours on Xbox</strong> and <strong>1 hour on phone</strong>.</p>
+        <button class="action-btn" onclick="startQuiz()">START RANDOMIZED QUEST 🚀</button>
     </div>
 
-    <!-- STAGE 1: THE SETTING & CARGO -->
-    <div class="screen" id="page-1">
-        <div class="tag tag-read">STAGE 1: THE WILD YUKON</div>
-        <h1>THE FROZEN TRAIL</h1>
+    <div class="screen" id="quiz-screen">
+        <div class="tag tag-read" id="question-tag">QUESTION 1 / 20</div>
+        <h1 id="question-title">Loading question...</h1>
         <div class="scene-img-container">
-            <img src="Husky%20sled%20dogs.png" alt="Husky sled dogs pulling through snow" class="scene-img">
+            <img id="question-image" src="bleak%20yukon%20wolf%20circle.png" alt="Chapter scene" class="scene-img">
         </div>
-        <p class="desc">Two men, <strong>Bill and Henry</strong>, are struggling through the frozen wilderness on a sled pulled by dogs. They are carrying a long, narrow box.</p>
-        
         <div class="challenge-box">
-            <p style="font-size: 18px; color: var(--fn-yellow);">What is inside the narrow wooden box tied to their sled?</p>
+            <p id="question-text" style="font-size: 16px; color: var(--fn-yellow);">Loading question...</p>
         </div>
-
-        <div class="options-grid" id="opts-1">
-            <button class="option-btn" onclick="handleChoice(1, this, false, 'Not gold! While the Yukon had gold rushes, this box contains something much more grim.')">A) Gold bullion from the mine</button>
-            <button class="option-btn" onclick="handleChoice(1, this, true)">B) The body of Lord Alfred (a coffin)</button>
-            <button class="option-btn" onclick="handleChoice(1, this, false, 'They have food bags on the sled, but that is not what is inside the long box!')">C) Fresh meat supplies for camp</button>
-            <button class="option-btn" onclick="handleChoice(1, this, false, 'Their rifles are kept close at hand, not strapped inside a box!')">D) Extra hunting rifles and ammo</button>
+        <div class="options-grid" id="options-grid"></div>
+        <div class="coach-box" id="feedback-box">
+            <h3>💡 QUEST FEEDBACK</h3>
+            <p id="feedback-text"></p>
         </div>
-
-        <div class="coach-box" id="coach-1">
-            <h3>💡 SQUAD COACH TIP:</h3>
-            <p id="coach-text-1"></p>
-        </div>
-
-        <button class="action-btn" id="btn-1" style="display:none;" onclick="nextPage(2)">STAGE 2: NIGHT CAMP ⏩</button>
+        <button class="action-btn" id="next-btn" style="display:none;" onclick="nextQuestion()">NEXT QUESTION ⏩</button>
     </div>
 
-    <!-- STAGE 2: THE MYSTERIOUS EXTRA FISH -->
-    <div class="screen" id="page-2">
-        <div class="tag tag-read">STAGE 2: FEEDING TIME</div>
-        <h1>COUNTING THE DOGS</h1>
-        <div class="scene-img-container">
-            <img src="bleak%20yukon%20wolf%20circle.png" alt="Bill and Henry around the campfire with dogs while a wolf circles in the background" class="scene-img">
-        </div>
-        <p class="desc">At night, Bill feeds dried fish to the sled dogs. He notices something strange happens when he hands out the food.</p>
-
-        <div class="challenge-box">
-            <p style="font-size: 18px; color: var(--fn-yellow);">Why does Bill say he gave out 7 fish when they only have 6 dogs?</p>
-        </div>
-
-        <div class="options-grid" id="opts-2">
-            <button class="option-btn" onclick="handleChoice(2, this, false, 'Bill is sharp and careful with food—he didn\'t miscount!')">A) He accidentally dropped a fish in the snow</button>
-            <button class="option-btn" onclick="handleChoice(2, this, false, 'One dog was greedy, but that wasn\'t why a 7th creature took a fish!')">B) One of their dogs ate two fish really quickly</button>
-            <button class="option-btn" onclick="handleChoice(2, this, true)">C) A wild wolf snuck in and took a fish pretending to be a dog</button>
-            <button class="option-btn" onclick="handleChoice(2, this, false, 'Henry was resting by the fire, not taking dog fish!')">D) Henry ate one of the dried fish</button>
-        </div>
-
-        <div class="coach-box" id="coach-2">
-            <h3>💡 SQUAD COACH TIP:</h3>
-            <p id="coach-text-2"></p>
-        </div>
-
-        <button class="action-btn" id="btn-2" style="display:none;" onclick="nextPage(3)">STAGE 3: THE ATMOSPHERE ⏩</button>
-    </div>
-
-    <!-- STAGE 3: THE WILDERNESS MOOD -->
-    <div class="screen" id="page-3">
-        <div class="tag tag-read">STAGE 3: THE WILDERNESS</div>
-        <h1>THE THREAT IN THE DARK</h1>
-        <div class="scene-img-container">
-            <img src="Dark%20scary%20forest%20at%20night.png" alt="Dark scary forest at night in freezing cold" class="scene-img">
-        </div>
-        <p class="desc">As night falls, red glowing eyes circle their campfire and loud howls fill the freezing air.</p>
-
-        <div class="challenge-box">
-            <p style="font-size: 18px; color: var(--fn-yellow);">How does Jack London describe the Yukon "Wild" in this chapter?</p>
-        </div>
-
-        <div class="options-grid" id="opts-3">
-            <button class="option-btn" onclick="handleChoice(3, this, false, 'The chapter emphasizes extreme silence, cold, and danger!')">A) A peaceful, welcoming winter paradise</button>
-            <button class="option-btn" onclick="handleChoice(3, this, true)">B) Vast, frozen, silent, and sternly hostile to human life</button>
-            <button class="option-btn" onclick="handleChoice(3, this, false, 'There are no towns anywhere near them on this trail!')">C) A bustling trade route full of traveler inns</button>
-            <button class="option-btn" onclick="handleChoice(3, this, false, 'The wilderness is freezing cold, covered in snow and ice!')">D) A warm, gentle forest with mild winds</button>
-        </div>
-
-        <div class="coach-box" id="coach-3">
-            <h3>💡 SQUAD COACH TIP:</h3>
-            <p id="coach-text-3"></p>
-        </div>
-
-        <button class="action-btn" id="btn-3" style="display:none;" onclick="nextPage(4)">STAGE 4: VOCABULARY ⏩</button>
-    </div>
-
-    <!-- STAGE 4: VOCABULARY IN CONTEXT -->
-    <div class="screen" id="page-4">
-        <div class="tag tag-read">STAGE 4: YUKON VOCABULARY</div>
-        <h1>WORD POWER</h1>
-        <div class="scene-img-container">
-            <img src="Dark%20scary%20forest%20at%20night.png" alt="Bleak frozen forest atmosphere in the Yukon night" class="scene-img">
-        </div>
-        <p class="desc">London writes that the wolf pack was <strong>"ravenous"</strong> as they stalked the sled team through the deep snow.</p>
-
-        <div class="challenge-box">
-            <p style="font-size: 18px; color: var(--fn-yellow);">What does the word <strong>RAVENOUS</strong> mean in this story?</p>
-        </div>
-
-        <div class="options-grid" id="opts-4">
-            <button class="option-btn" onclick="handleChoice(4, this, false, 'Sled dogs are tired, but ravenous describes their hunger!')">A) Extremely exhausted and sleepy</button>
-            <button class="option-btn" onclick="handleChoice(4, this, true)">B) Extremely hungry and famished</button>
-            <button class="option-btn" onclick="handleChoice(4, this, false, 'Playful dogs aren\'t circling a campfire in the dark!')">C) Playful and friendly</button>
-            <button class="option-btn" onclick="handleChoice(4, this, false, 'Loud noises might happen, but ravenous refers to stomach state!')">D) Loud and noisy</button>
-        </div>
-
-        <div class="coach-box" id="coach-4">
-            <h3>💡 SQUAD COACH TIP:</h3>
-            <p id="coach-text-4"></p>
-        </div>
-
-        <button class="action-btn" id="btn-4" style="display:none;" onclick="nextPage(5)">STAGE 5: FLASHCARDS ⏩</button>
-    </div>
-
-    <!-- STAGE 5: ACTIVE RECALL FLASHCARDS -->
-    <div class="screen" id="page-5">
-        <div class="tag tag-flash">STAGE 5: ACTIVE RECALL ARENA</div>
-        <h1>VOCABULARY & STORY FLASHCARDS</h1>
-        <p class="desc">Say the answer OUT LOUD first (Active Recall), then tap to flip! Tap <strong>AGAIN</strong> if you need to repeat a card until it's mastered!</p>
-
-        <div style="font-size:14px; font-weight:bold; margin-bottom:8px; color:var(--fn-blue);" id="cards-remaining">CARDS LEFT: 5</div>
-
-        <div class="flashcard-wrapper" onclick="flipCard()">
-            <div class="flashcard" id="active-card">
-                <div class="card-front">
-                    <span style="font-size: 11px; color: #aaa;">TAP TO REVEAL ANSWER</span>
-                    <h2 style="font-size: 24px; margin-top: 10px;" id="fc-q">Loading Question...</h2>
-                </div>
-                <div class="card-back">
-                    <h2 style="font-size: 20px; color:var(--fn-yellow); margin-bottom: 6px;">ANSWER 💡</h2>
-                    <p style="font-size: 16px;" id="fc-a">Loading Answer...</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="rep-controls" id="rep-controls">
-            <button class="rep-btn rep-again" onclick="rateCard(false)">❌ AGAIN (RE-QUEUE)</button>
-            <button class="rep-btn rep-easy" onclick="rateCard(true)">✅ EASY (MASTERED)</button>
-        </div>
-
-        <button class="action-btn" id="btn-5" style="display:none;" onclick="nextPage(6)">CLAIM VICTORY 🏆</button>
-    </div>
-
-    <!-- STAGE 6: VICTORY ROYALE -->
-    <div class="screen" id="page-6">
-        <div style="font-size: 70px; text-align: center; margin-bottom: 10px;">🐺</div>
-        <div class="tag tag-wf" style="margin: 0 auto 10px auto; display: table;">QUEST COMPLETED</div>
+    <div class="screen" id="results-screen">
+        <div style="font-size: 70px; text-align: center; margin-bottom: 10px;">🏆</div>
+        <div class="tag tag-wf" style="margin: 0 auto 10px auto; display: table;">QUEST COMPLETE</div>
         <h1 style="text-align: center; color: var(--fn-yellow);">CHAPTER 1 MASTERED!</h1>
         <div class="scene-img-container">
             <img src="Female%20wolf%20and%20husky%20touching%20noses.png" alt="Female wolf and husky touching noses in snow" class="scene-img">
         </div>
-        <p class="desc" style="text-align: center;">Legendary job, Blake! You fully decoded Jack London's <em>White Fang</em> Chapter 1, mastered key vocabulary, and conquered Active Recall!</p>
-
         <div class="challenge-box" style="text-align: center;">
-            <h3 style="font-size: 28px; font-family:'Teko';">TOTAL XP EARNED</h3>
-            <p style="font-size: 48px; font-weight: 900; color: var(--fn-blue);" id="final-vbucks">0</p>
+            <h3 style="font-size: 24px; font-family:'Teko';">THIS RUN XP</h3>
+            <p style="font-size: 42px; font-weight: 900; color: var(--fn-blue);" id="run-xp">0</p>
+            <h3 style="font-size: 20px; font-family:'Teko'; margin-top: 8px;">TOTAL SAVED XP</h3>
+            <p style="font-size: 34px; font-weight: 900; color: var(--fn-yellow);" id="total-xp">0</p>
+            <p id="bonus-time" style="margin-top: 8px; font-size: 15px; color: #f1f5f9;"></p>
         </div>
-
-        <button class="action-btn" onclick="location.reload()">REPLAY QUEST 🔄</button>
+        <button class="action-btn" onclick="location.reload()">PLAY AGAIN 🔄</button>
     </div>
 </div>
 
 <script>
-    let vbucks = 0;
-    const totalPages = 6;
+    const XP_PER_CORRECT = 250;
+    const TOTAL_QUESTIONS = 20;
+    const XP_CAP = 30000;
+    const STORAGE_KEY = 'blake-white-fang-xp';
 
-    function updateHUD() { document.getElementById('vbucks-count').innerText = vbucks; }
+    let totalXP = Number(localStorage.getItem(STORAGE_KEY) || 0);
+    let sessionXP = 0;
+    let questionBank = [];
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let answered = false;
 
-    function nextPage(p) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(`page-${p}`).classList.add('active');
-        document.getElementById('progress-bar').style.width = `${(p / totalPages) * 100}%`;
-        if(p === 6) document.getElementById('final-vbucks').innerText = vbucks;
+    function updateHUD() {
+        document.getElementById('vbucks-count').innerText = totalXP;
     }
 
-    function handleChoice(stage, btn, isCorrect, coachText = '') {
-        const coachBox = document.getElementById(`coach-${stage}`);
-        const coachMsg = document.getElementById(`coach-text-${stage}`);
-        const nextBtn = document.getElementById(`btn-${stage}`);
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function shuffleArray(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function pickVariant(list) {
+        return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function bonusTimeText(xp) {
+        const mins = Math.min((xp / 5000) * 30, 180);
+        const xboxMins = Math.min((mins * 2) / 3, 120);
+        const phoneMins = Math.min((mins * 1) / 3, 60);
+        const xboxHours = Math.floor(xboxMins / 60);
+        const xboxRem = Math.round(xboxMins % 60);
+        const phoneHours = Math.floor(phoneMins / 60);
+        const phoneRem = Math.round(phoneMins % 60);
+        return `Bonus time: ${Math.floor(mins / 60)}h ${Math.round(mins % 60)}m total. Xbox: ${xboxHours}h ${xboxRem}m • Phone: ${phoneHours}h ${phoneRem}m`;
+    }
+
+    function buildQuestionBank() {
+        questionBank = [
+            {
+                image: 'White%20Fang-style%20wolf.png',
+                promptVariants: [
+                    'What is inside the wooden box the men are carrying?',
+                    'What is resting in the narrow box tied to the sled?',
+                    'What hidden object is packed inside the long box on the trail?'
+                ],
+                options: [
+                    { textVariants: ['The coffin of Lord Alfred', 'The body of Lord Alfred in a coffin'], correct: true },
+                    { textVariants: ['A bag of gold', 'A stash of gold coins'], correct: false },
+                    { textVariants: ['Fresh meat supplies', 'A bundle of food for camp'], correct: false },
+                    { textVariants: ['Extra rifles and ammo', 'A crate of hunting weapons'], correct: false }
+                ]
+            },
+            {
+                image: 'bleak%20yukon%20wolf%20circle.png',
+                promptVariants: [
+                    'Why does Bill say there are 7 fish when there are only 6 dogs?',
+                    'What strange reason makes Bill think he has given out one extra fish?',
+                    'Why does Bill realise he has handed out more fish than there are dogs?'
+                ],
+                options: [
+                    { textVariants: ['A wild wolf sneaked in and took one', 'A wolf disguised as a dog stole a fish'], correct: true },
+                    { textVariants: ['One dog ate two fish too fast', 'A greedy dog gobbled down extra food'], correct: false },
+                    { textVariants: ['Henry dropped one in the snow', 'A fish was lost during the feeding'], correct: false },
+                    { textVariants: ['Bill miscounted by mistake', 'He got mixed up while counting'], correct: false }
+                ]
+            },
+            {
+                image: 'Dark%20scary%20forest%20at%20night.png',
+                promptVariants: [
+                    'What does the Yukon feel like in this chapter?',
+                    'How is the wilderness described by the author?',
+                    'What kind of place is the Yukon in this part of the story?'
+                ],
+                options: [
+                    { textVariants: ['Frozen, silent, and hostile', 'Cold, empty, and dangerous'], correct: true },
+                    { textVariants: ['Warm and welcoming', 'Soft and friendly'], correct: false },
+                    { textVariants: ['Busy with travellers', 'Full of lively campsites'], correct: false },
+                    { textVariants: ['Bright and peaceful', 'Sunny and calm'], correct: false }
+                ]
+            },
+            {
+                image: 'Husky%20sled%20dogs.png',
+                promptVariants: [
+                    'Who are the two main human characters in Chapter 1?',
+                    'Which two men are travelling through the snow?',
+                    'Who are the travellers in the sled scene?'
+                ],
+                options: [
+                    { textVariants: ['Bill and Henry', 'Bill and Henry together'], correct: true },
+                    { textVariants: ['Tom and Sam', 'Tom and Sam on the trail'], correct: false },
+                    { textVariants: ['Jack and Lewis', 'Jack and Lewis in the snow'], correct: false },
+                    { textVariants: ['Mick and Owen', 'Mick and Owen in the cold'], correct: false }
+                ]
+            },
+            {
+                image: 'Dogs%20huddled%20around%20a%20campfire.png',
+                promptVariants: [
+                    'What do the dogs do around the campfire at night?',
+                    'How are the dogs gathered near the fire?',
+                    'What is the dogs\' position around the fire?'
+                ],
+                options: [
+                    { textVariants: ['They huddle close together for warmth', 'They crowd in tightly to stay warm'], correct: true },
+                    { textVariants: ['They run in circles around it', 'They chase each other near the flames'], correct: false },
+                    { textVariants: ['They sit far away from it', 'They keep their distance from the heat'], correct: false },
+                    { textVariants: ['They bark loudly at it', 'They howl at the fire'], correct: false }
+                ]
+            },
+            {
+                image: 'Dark%20scary%20forest%20at%20night.png',
+                promptVariants: [
+                    'What do the glowing eyes in the dark suggest?',
+                    'What is the danger near the camp?',
+                    'What is circling the camp in the night?' 
+                ],
+                options: [
+                    { textVariants: ['A wolf or wolves are nearby', 'Wild wolves are closing in'], correct: true },
+                    { textVariants: ['The men are being watched by birds', 'Birds are circling above'], correct: false },
+                    { textVariants: ['The dogs are chasing shadows', 'The dogs are running off'], correct: false },
+                    { textVariants: ['The weather is turning calm', 'The storm has passed'], correct: false }
+                ]
+            },
+            {
+                image: 'White%20Fang-style%20wolf.png',
+                promptVariants: [
+                    'What does the word ravenous mean in the story?',
+                    'What does ravenous tell us about the wolves?',
+                    'How would you describe the wolves when they are ravenous?'
+                ],
+                options: [
+                    { textVariants: ['Extremely hungry', 'Famished and desperate for food'], correct: true },
+                    { textVariants: ['Very tired', 'Completely exhausted'], correct: false },
+                    { textVariants: ['Playful and cheerful', 'Happy and silly'], correct: false },
+                    { textVariants: ['Quiet and sleepy', 'Calm and resting'], correct: false }
+                ]
+            },
+            {
+                image: 'Husky%20sled%20dogs.png',
+                promptVariants: [
+                    'What are the dogs mainly used for?',
+                    'What job do the dogs do on the sled journey?',
+                    'What is the purpose of the sled dogs here?'
+                ],
+                options: [
+                    { textVariants: ['To pull the sled across the snow', 'To haul the sled through the wilderness'], correct: true },
+                    { textVariants: ['To guard the campfire', 'To watch over the fire at night'], correct: false },
+                    { textVariants: ['To hunt fish for the men', 'To catch food for the travellers'], correct: false },
+                    { textVariants: ['To carry the box by themselves', 'To transport the box alone'], correct: false }
+                ]
+            },
+            {
+                image: 'bleak%20yukon%20wolf%20circle.png',
+                promptVariants: [
+                    'What is the mood of the chapter around the camp?',
+                    'How does the scene feel at night?',
+                    'What atmosphere surrounds the camp?'
+                ],
+                options: [
+                    { textVariants: ['Tense and dangerous', 'Ominous and threatening'], correct: true },
+                    { textVariants: ['Warm and cheerful', 'Friendly and happy'], correct: false },
+                    { textVariants: ['Bright and lively', 'Busy and playful'], correct: false },
+                    { textVariants: ['Soft and peaceful', 'Calm and restful'], correct: false }
+                ]
+            },
+            {
+                image: 'Dark%20scary%20forest%20at%20night.png',
+                promptVariants: [
+                    'Why are the men and dogs uneasy in the dark?',
+                    'What makes the camp feel unsafe at night?',
+                    'What causes the fear in the wilderness?' 
+                ],
+                options: [
+                    { textVariants: ['The wolves are close and the night is harsh', 'The danger of wolves and cold makes them uneasy'], correct: true },
+                    { textVariants: ['The dogs are too tired to move', 'The dogs are sleepy and still'], correct: false },
+                    { textVariants: ['The fire has gone out', 'The campfire is no longer glowing'], correct: false },
+                    { textVariants: ['The snow has melted away', 'The ground is too warm'], correct: false }
+                ]
+            },
+            {
+                image: 'White%20Fang-style%20wolf.png',
+                promptVariants: [
+                    'What kind of animal is linked to the strange extra fish?',
+                    'What creature appears to be taking the fish?',
+                    'Which animal seems to be stealing the food?'
+                ],
+                options: [
+                    { textVariants: ['A wolf', 'A wild wolf'], correct: true },
+                    { textVariants: ['A fox', 'A clever fox'], correct: false },
+                    { textVariants: ['A bear', 'A huge bear'], correct: false },
+                    { textVariants: ['A rabbit', 'A small rabbit'], correct: false }
+                ]
+            },
+            {
+                image: 'Husky%20sled%20dogs.png',
+                promptVariants: [
+                    'What are the dogs doing while the men travel?',
+                    'How do the dogs help the men on the journey?',
+                    'What role do the dogs play in the scene?'
+                ],
+                options: [
+                    { textVariants: ['They pull the sled through the snow', 'They drag the sled over the frozen trail'], correct: true },
+                    { textVariants: ['They carry the box on their backs', 'They transport the coffin themselves'], correct: false },
+                    { textVariants: ['They build the campfire', 'They make the fire for the men'], correct: false },
+                    { textVariants: ['They gather food from the trees', 'They collect berries from the forest'], correct: false }
+                ]
+            },
+            {
+                image: 'Dogs%20huddled%20around%20a%20campfire.png',
+                promptVariants: [
+                    'Why are the dogs huddled close together?',
+                    'What reason makes the dogs crowd around the fire?',
+                    'Why do the dogs press together at camp?'
+                ],
+                options: [
+                    { textVariants: ['To stay warm in the freezing cold', 'To keep warm in the bitter weather'], correct: true },
+                    { textVariants: ['To watch the wolves from a distance', 'To keep an eye on the wolves'], correct: false },
+                    { textVariants: ['To keep the campfire alive', 'To feed the fire'], correct: false },
+                    { textVariants: ['To hide from the men', 'To avoid the travellers'], correct: false }
+                ]
+            },
+            {
+                image: 'bleak%20yukon%20wolf%20circle.png',
+                promptVariants: [
+                    'What surrounds the camp in the darkness?',
+                    'What is moving around the campfire in the night?',
+                    'What can be heard in the shadows around the camp?'
+                ],
+                options: [
+                    { textVariants: ['The threat of wolves', 'The presence of wolves'], correct: true },
+                    { textVariants: ['A line of travellers', 'Some nearby hikers'], correct: false },
+                    { textVariants: ['A flock of birds', 'A party of birds'], correct: false },
+                    { textVariants: ['A sudden warm breeze', 'A gentle wind'], correct: false }
+                ]
+            },
+            {
+                image: 'Dark%20scary%20forest%20at%20night.png',
+                promptVariants: [
+                    'What kind of setting is the chapter set in?',
+                    'What environment surrounds the men and dogs?',
+                    'Where are Bill and Henry travelling?'
+                ],
+                options: [
+                    { textVariants: ['The frozen Yukon wilderness', 'The icy wilderness of the Yukon'], correct: true },
+                    { textVariants: ['A bright city street', 'A busy town road'], correct: false },
+                    { textVariants: ['A warm jungle', 'A tropical forest'], correct: false },
+                    { textVariants: ['A green meadow', 'A peaceful field'], correct: false }
+                ]
+            },
+            {
+                image: 'White%20Fang-style%20wolf.png',
+                promptVariants: [
+                    'What is the main feeling of the chapter?',
+                    'What emotion best fits the chapter?',
+                    'What mood hangs over the adventure?'
+                ],
+                options: [
+                    { textVariants: ['Tension and danger', 'Suspense and fear'], correct: true },
+                    { textVariants: ['Joy and laughter', 'Cheer and excitement'], correct: false },
+                    { textVariants: ['Relaxation and ease', 'Comfort and peace'], correct: false },
+                    { textVariants: ['Curiosity and wonder', 'Excitement and discovery'], correct: false }
+                ]
+            },
+            {
+                image: 'Female%20wolf%20and%20husky%20touching%20noses.png',
+                promptVariants: [
+                    'What is the most important lesson of this chapter?',
+                    'What idea is the chapter building toward?',
+                    'What is the chapter teaching the reader about the wild?'
+                ],
+                options: [
+                    { textVariants: ['The wild is harsh and dangerous', 'The wilderness is unforgiving and powerful'], correct: true },
+                    { textVariants: ['The wild is easy to manage', 'Nature is simple and safe'], correct: false },
+                    { textVariants: ['The wild is full of friendly animals', 'The wilderness is harmless'], correct: false },
+                    { textVariants: ['The wild is a place for fun', 'The forest is a playground'], correct: false }
+                ]
+            }
+        ];
+    }
+
+    function startQuiz() {
+        buildQuestionBank();
+        const shuffled = shuffleArray(questionBank).slice(0, TOTAL_QUESTIONS);
+        currentQuestions = shuffled;
+        currentIndex = 0;
+        answered = false;
+        sessionXP = 0;
+        updateHUD();
+        showScreen('quiz-screen');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const question = currentQuestions[currentIndex];
+        const prompt = pickVariant(question.promptVariants);
+        document.getElementById('question-tag').innerText = `QUESTION ${currentIndex + 1} / ${TOTAL_QUESTIONS}`;
+        document.getElementById('question-title').innerText = 'CHAPTER 1 QUIZ';
+        document.getElementById('question-image').src = question.image;
+        document.getElementById('question-text').innerText = prompt;
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = '';
+        const shuffledOptions = shuffleArray(question.options);
+        shuffledOptions.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn';
+            button.innerText = `${String.fromCharCode(65 + index)}) ${pickVariant(option.textVariants)}`;
+            button.onclick = () => answerQuestion(button, option.correct, option.textVariants[0]);
+            optionsGrid.appendChild(button);
+        });
+        document.getElementById('feedback-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        answered = false;
+        document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / TOTAL_QUESTIONS) * 100}%`;
+    }
+
+    function answerQuestion(button, isCorrect, correctText) {
+        if (answered) return;
+        answered = true;
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
 
         if (isCorrect) {
-            btn.classList.add('correct');
-            coachBox.style.display = 'none';
-            vbucks += 1000;
+            button.classList.add('correct');
+            sessionXP += XP_PER_CORRECT;
+            totalXP = Math.min(totalXP + XP_PER_CORRECT, XP_CAP);
+            localStorage.setItem(STORAGE_KEY, totalXP);
             updateHUD();
-            btn.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
-            nextBtn.style.display = 'block';
+            feedbackText.innerText = pickVariant([
+                'Great job! That answer is correct and Blake earns XP.',
+                'Excellent work! The answer is right and the XP grows.',
+                'Nice one! Blake stays on the path to bonus time.'
+            ]);
         } else {
-            btn.classList.add('disabled');
-            coachMsg.innerText = coachText;
-            coachBox.style.display = 'block';
+            button.classList.add('disabled');
+            feedbackText.innerText = pickVariant([
+                'Not quite. The correct answer was: ' + correctText + '.',
+                'Almost there. The right answer is: ' + correctText + '.',
+                'Close call. The correct answer is: ' + correctText + '.'
+            ]);
+        }
+
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.add('disabled'));
+        feedbackBox.style.display = 'block';
+        nextBtn.style.display = 'block';
+        if (currentIndex === TOTAL_QUESTIONS - 1) {
+            nextBtn.innerText = 'VIEW RESULTS 🏁';
         }
     }
 
-    // Active Recall Flashcards
-    let deck = [
-        { q: "Who are the two main human characters in Chapter 1?", a: "Bill and Henry!" },
-        { q: "What is inside the narrow box on the sled?", a: "The coffin of Lord Alfred!" },
-        { q: "Why was there an extra fish taken at feeding time?", a: "A wild wolf snuck into camp posing as a dog!" },
-        { q: "What does 'Ravenous' mean?", a: "Extremely hungry / famished!" },
-        { q: "Where is 'White Fang' set?", a: "The frozen Yukon Territory (Canada)!" }
-    ];
-
-    let currentCard = 0;
-    let isFlipped = false;
-
-    function renderCard() {
-        if (deck.length === 0) {
-            document.querySelector('.flashcard-wrapper').style.display = 'none';
-            document.getElementById('rep-controls').style.display = 'none';
-            document.getElementById('cards-remaining').innerText = "🎉 ALL 5 CARDS MASTERED!";
-            document.getElementById('btn-5').style.display = 'block';
-            vbucks += 1000;
-            updateHUD();
-            return;
-        }
-
-        currentCard = currentCard % deck.length;
-        document.getElementById('cards-remaining').innerText = `CARDS LEFT TO MASTER: ${deck.length}`;
-        const cardEl = document.getElementById('active-card');
-        cardEl.classList.remove('flipped');
-        isFlipped = false;
-        document.getElementById('rep-controls').style.display = 'none';
-
-        setTimeout(() => {
-            document.getElementById('fc-q').innerText = deck[currentCard].q;
-            document.getElementById('fc-a').innerText = deck[currentCard].a;
-        }, 150);
-    }
-
-    function flipCard() {
-        if (deck.length === 0) return;
-        const cardEl = document.getElementById('active-card');
-        cardEl.classList.toggle('flipped');
-        isFlipped = !isFlipped;
-        if (isFlipped) {
-            document.getElementById('rep-controls').style.display = 'grid';
-        }
-    }
-
-    function rateCard(easy) {
-        if (easy) {
-            deck.splice(currentCard, 1);
+    function nextQuestion() {
+        if (currentIndex < TOTAL_QUESTIONS - 1) {
+            currentIndex += 1;
+            renderQuestion();
         } else {
-            const item = deck.splice(currentCard, 1)[0];
-            deck.push(item);
+            finishQuiz();
         }
-        renderCard();
     }
 
-    renderCard();
+    function finishQuiz() {
+        document.getElementById('run-xp').innerText = sessionXP;
+        document.getElementById('total-xp').innerText = totalXP;
+        document.getElementById('bonus-time').innerText = bonusTimeText(totalXP);
+        updateHUD();
+        showScreen('results-screen');
+    }
+
+    updateHUD();
 </script>
 </body>
 </html>
