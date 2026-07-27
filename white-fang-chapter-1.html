@@ -287,6 +287,7 @@
     let currentFlashIndex = 0;
     let answered = false;
     let flashAnswered = false;
+    let flashRevealed = false;
     let flashResponses = [];
 
     function updateHUD() {
@@ -587,7 +588,9 @@
         document.getElementById('flashcard-question').innerText = prompt;
         document.getElementById('flashcard-answer').innerText = pickVariant(card.options.find(opt => opt.correct).textVariants);
         document.getElementById('flashcard-hint').innerText = 'Tap the card to flip, then choose whether you feel confident with this concept.';
-        document.getElementById('flashcard-card').classList.remove('flipped');
+        const flashcard = document.getElementById('flashcard-card');
+        flashcard.classList.remove('flipped');
+        flashRevealed = false;
         const buttons = [
             { text: 'Yes, I know this', value: true, cls: 'yes' },
             { text: 'No, I need to review', value: false, cls: 'no' }
@@ -597,8 +600,9 @@
         grid.innerHTML = '';
         shuffledButtons.forEach(btnData => {
             const btn = document.createElement('button');
-            btn.className = `flash-answer-btn ${btnData.cls}`;
+            btn.className = `flash-answer-btn ${btnData.cls} disabled`;
             btn.innerText = btnData.text;
+            btn.disabled = true;
             btn.onclick = (event) => { event.stopPropagation(); answerFlashcard(btn, btnData.value); };
             grid.appendChild(btn);
         });
@@ -608,7 +612,17 @@
 
     function toggleFlashcardFlip() {
         const card = document.getElementById('flashcard-card');
+        const nowRevealed = !card.classList.contains('flipped');
         card.classList.toggle('flipped');
+        flashRevealed = nowRevealed;
+        const buttons = document.querySelectorAll('.flash-answer-btn');
+        buttons.forEach(btn => {
+            btn.disabled = !nowRevealed;
+            btn.classList.toggle('disabled', !nowRevealed);
+        });
+        document.getElementById('flashcard-hint').innerText = nowRevealed
+            ? 'Answer revealed! Now choose yes or no.'
+            : 'Tap the card to flip it again and reveal the answer.';
     }
 
     function answerFlashcard(button, knewIt) {
